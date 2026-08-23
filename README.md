@@ -4,7 +4,7 @@ ESP32-basierte Steuerung fuer Fallblattanzeigen (MAN/Krone/Vossloh) mit:
 - WiFi Access Point
 - Weboberflaeche/HTTP-API
 - Serieller Ausgabe im Krone-Protokoll
-- I2C-Transfer von Integer-Werten an 4 Slave-Adressen
+- I2C-Transfer von Byte-Werten an 3 Slave-Adressen (ADTrans)
 
 ## Projektziel
 
@@ -82,39 +82,17 @@ Beispiel:
 /flip?b=1&g=2&n=42&s=12&m=34&i1=5&i2=6&d=7&z=8
 ```
 
-### 4) I2C Integer an 4 Adressen senden
-
-- `GET /i2c`
-- Erwartete Query-Parameter:
-  - `v1`, `v2`, `v3`, `v4`
-- Zuordnung:
-  - `v1` -> `I2C_ADDR_1`
-  - `v2` -> `I2C_ADDR_2`
-  - `v3` -> `I2C_ADDR_3`
-  - `v4` -> `I2C_ADDR_4`
-
-Beispiel:
-
-```text
-/i2c?v1=100&v2=200&v3=300&v4=400
-```
-
-Antwort:
-
-```text
-i2c_rc=<rc1>,<rc2>,<rc3>,<rc4>
-```
-
-`rc` ist der Rueckgabecode von `Wire.endTransmission()` pro Zieladresse.
+Hinweis:
+- Der Endpoint `/flip` steuert zusaetzlich 3 I2C-Module (ADTrans) ueber `I2C_ADDR_1..3`.
+- Je nach Laenge der Zugnummer werden Ziffern auf UART-Fallblattmodule und I2C-Module verteilt.
 
 ## I2C-Konfiguration
 
 Standardwerte in [platformio.ini](platformio.ini):
 
-- `I2C_ADDR_1=0x10`
-- `I2C_ADDR_2=0x11`
-- `I2C_ADDR_3=0x12`
-- `I2C_ADDR_4=0x13`
+- `I2C_ADDR_1=0x38`
+- `I2C_ADDR_2=0x39`
+- `I2C_ADDR_3=0x3A`
 
 Optionale Pinbelegung (auskommentiert):
 - `I2C_SDA_PIN`
@@ -139,6 +117,7 @@ Aktueller Stand gemaess [platformio.ini](platformio.ini) und [src/main.cpp](src/
 Hinweis:
 - Auf vielen ESP32-Boards liegt USB-Debug intern auf UART0 (typisch TX0=GPIO1, RX0=GPIO3).
 - Fuer die Fallblattansteuerung wird ausschliesslich `Serial2` genutzt.
+- Die ADTrans-I2C-Module werden mit `sendByte(...)` angesteuert (kein separater HTTP-I2C-Endpoint).
 
 ## Fallblatt-Adressen (seriell)
 
@@ -192,10 +171,10 @@ Pruefung/Fix:
 ### I2C-Geraet reagiert nicht
 
 Symptom:
-- Rueckgabe `i2c_rc` ist ungleich `0`.
+- Ziffern auf den ADTrans-Modulen fehlen oder bleiben auf Leerwert.
 
 Pruefung/Fix:
-- I2C-Adressen in [platformio.ini](platformio.ini) mit den Slave-Adressen abgleichen (`I2C_ADDR_1..4`).
+- I2C-Adressen in [platformio.ini](platformio.ini) mit den Slave-Adressen abgleichen (`I2C_ADDR_1..3`).
 - Falls eigene Pins noetig sind, `I2C_SDA_PIN` und `I2C_SCL_PIN` in [platformio.ini](platformio.ini) aktivieren.
 - GND zwischen ESP32 und I2C-Slaves gemeinsam verbinden.
 
