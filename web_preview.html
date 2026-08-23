@@ -1,0 +1,599 @@
+<html>
+<head>
+  <meta charset='UTF-8'>
+  <title>Fallblattanzeige</title>
+ <style>
+
+* {
+  box-sizing: border-box;
+  font-family: 'Tahoma', sans-serif;
+
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  padding: 0;
+  background: linear-gradient(to left top, #2FECF7, #0DFF82);
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-size: 20px;
+}
+
+form {
+  background-color: white;
+  border-radius: 10px;
+  -webkit-box-shadow: 5px 5px 20px 0px #adadad;
+  -moz-box-shadow: 5px 5px 20px 0px #adadad;
+  box-shadow: 5px 5px 20px 0px #adadad;
+  padding: 1.5em;
+  margin: 3em;
+}
+
+h2 {
+  text-align: center;
+  font-size: 35px;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input, select {
+  padding: 10px 16px;
+  width: 100%;
+  outline: 0;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 0;
+  background-color: #ededed;
+  font-weight: 700;
+  font-size: 20px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.textarea-div {
+  width: 100%;
+}
+
+textarea {
+  padding: 10px;
+  width: 100%;
+  outline: 0;
+  margin-bottom: 20px;
+  border-radius: 20px;
+  border: 0;
+  background-color: #ededed;
+  font-size: 14px;
+  height: 100px;
+}
+
+.btn {
+  background-color: #0DFF82;
+  padding: 12px 15px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  transition: 0.3s all ease;
+  text-align: center;
+  vertical-align: middle;
+}
+.btn:hover {
+  background-color: #2FECF7;
+}
+
+
+
+@media screen and (max-width: 1000px) {
+ body { 
+    padding: 0;
+    margin: 0;
+}
+
+.btn {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+html, body, input[type='text'],input[type='number'], select, input[type='reset'] {
+   font-size: 35px;
+  }
+
+input, select, .btn { 
+border-radius: 15px;
+}
+
+.smallest-group {
+    width: 99%;
+}
+
+.small-group {
+    width: 99%;
+}
+.medium-group {
+    width: 99%;
+}
+
+.halbmobil {
+  width: 48%;
+  float: left;
+}
+
+.halbmobil {
+   margin-right: 2%;
+}
+
+form {
+    padding: 0.8em;
+    margin: 0;
+    border-radius: 0;
+  }
+
+}
+
+
+@media screen and (min-width: 1000px) {
+
+
+  .large-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .small-group {
+    width: 48%;
+  }
+ .smallest-group {
+    width: 18%;
+  }
+ .medium-group {
+    width: 32%;
+  }
+}
+
+</style>
+
+</head>
+<body>
+
+  <form>
+    <h2>Fallblattanzeige</h2>
+    <div class='large-group'>
+       <div class='smallest-group'>
+        <label for='gattung'>Gattung</label>
+        <select id='gattung' name='gattung'>
+          <option value='32'>Gattung w&auml;hlen</option>
+          <option value='34'>D</option>
+          <option value='35'>EC</option>
+          <option value='36'>IC</option>
+          <option value='37'>ICE</option>
+          <option value='38'>IR</option>
+          <option value='39'>RB</option>
+          <option value='40'>RE</option>
+          <option value='41'>SE</option>
+          <option value='42'>S</option>
+          <option value='43'>Leer</option>
+          <option value='44'>Leer</option>
+          <option value='45'>ICN</option>
+          <option value='46'>M</option>
+          <option value='47'>THL</option>
+          <option value='48'>CNL</option>
+          <option value='49'>UEx</option>
+          <option value='50'>EN</option>
+          <option value='51'>NZ</option>
+          <option value=52'>FD</option>
+          <option value='53'>TEE</option>
+          <option value='54'>AZ</option>
+          <option value='55'>TGV</option>
+          <option value='56'>IRE</option>
+          <option value='57'>NJ</option>
+          <option value='58'>EST</option>
+          <option value='59'>DZ</option>
+          <option value='60'>Leer1</option>
+          <option value='61'>Leer2</option>
+          <option value='62'>Leer3</option>
+          <option value='63'>Leer4</option>
+          <option value='64'>Leer5</option>
+          <option value='65'>Leer6</option>
+          <option value='66'>Leer7</option>
+          <option value='67'>Leer8</option>
+          <option value='68'>Leer9</option>
+          <option value='69'>Leer10</option>
+          <option value='70'>Leer11</option>
+          <option value='71'>Leer12</option>   
+        </select>
+                        </div>
+        <div class='smallest-group halbmobil'>
+        <label for='betreiber'>Betreiber</label>
+        <select id='betreiber' name='betreiber'>
+          <option value='32'>Betreiber w&auml;hlen</option>
+          
+          <option value='63'>DB</option>
+          <option value='64'>Alex</option>
+          <option value='65'>HLB</option>
+          <option value='66'>Flixtrain</option>
+          <option value='67'>&Ouml;BB</option>
+          <option value='68'>CD</option>
+          <option value='69'>SBB</option>
+          <option value='70'>PKP</option>
+          <option value='71'>NS</option>
+          <option value='72'>SNCF</option>
+          <option value='40'>1</option>
+          <option value='41'>2</option>
+          <option value='42'>3</option>
+          <option value='43'>4</option>
+          <option value='44'>5</option>
+          <option value='45'>6</option>
+          <option value='46'>7</option>
+          <option value='47'>8</option>
+          <option value='48'>9</option>
+          <option value='49'>10</option>
+          <option value='50'>11</option>
+          <option value='51'>12</option>
+          <option value='52'>13</option>
+          <option value='53'>14</option>
+          <option value='54'>15</option>
+          <option value='55'>16</option>
+          <option value='56'>17</option>
+          <option value='57'>18</option>
+          <option value='58'>19</option>
+          <option value='59'>20</option>
+          <option value='60'>21</option>
+          <option value='61'>22</option>
+          <option value='62'>23</option>
+          <option value='73'>VIAS</option>
+          <option value='74'>TCX</option>
+          <option value='75'>Leer</option>
+          <option value='76'>Leer</option>
+          <option value='77'>Leer</option>
+          <option value='39'>Leer</option>
+
+        </select>
+      </div>
+       
+       <div class='smallest-group halbmobil'>
+        <label for='zugnummer'>Zugnummer</label>
+        <input id='zugnummer' type='number' name='zugnummer' min='0' max='99999'/>
+      </div>
+      
+      <div class='smallest-group halbmobil'>
+        <label for='abstd'>Abfahrt Std</label>
+        <input id='abstd' for='abstd' name='abstd' type='number' min='0' max='23'/>
+      </div>
+      <div class='smallest-group halbmobil'>
+        <label for='abmin'>Abfahrt Min</label>
+        <input id='abmin' for='abmin' name='abmin' type='number' min='0' max='59'/>
+      </div>
+      
+      <div class='small-group'>
+        <label for='info1'>Information 1</label>
+        <select id='info1' name='info1' style='background: blue; color:yellow;'>
+          <option value='32'>Information ausw&auml;hlen</option>
+          <option value='34'>Besonderer Fahrpreis</option>
+          <option value='35'>RE1 NRW-Express</option>
+          <option value='36'>RE3 Rhein-Emscher-Express</option>
+          <option value='37'>RE4 Wupper-Express</option>
+          <option value='38'>RE7 Rhein-M&uuml;nsterland-Express</option>
+          <option value='39'>RE11 Westfalen-Express</option>
+          <option value='40'>RE59 Hellweg-Bahn</option>
+          <option value='41'>RB69 Ems-Lippe-Bahn</option>
+          <option value='42'>nicht einsteigen</option>
+          <option value='43'>Sonderzug</option>
+          <option value='44'>nur (Betticon)</option>
+          <option value='45'>Ersatz durch Bus</option>
+          <option value='46'>Zus&auml;tzlicher Zug</option>
+          <option value='47'>h&auml;lt nicht &uuml;berall</option>
+          <option value='48'>H&auml;lt nicht in Mersch --- WR AWRB</option>
+          <option value='49'>Astana Omsk Rostov</option>
+          <option value='50'>H&auml;lt nur zum Zustieg</option>
+          <option value='51'>Messesonderzug</option>
+          <option value='52'>Wagenstandsanzeiger beachten</option>
+          <option value='53'>RE6 Westfalen-Express</option>
+          <option value='54'>RE11 Rhein-Hellweg-Express</option>
+          <option value='55'>RE13 Maas-Wupper-Express</option>
+          <option value='56'>RE65 Ems-Lippe-Bahn</option>
+          <option value='57'>RB69 Ems-B&ouml;rde-Bahn</option>
+          <option value='58'>RB89 Ems-B&ouml;rde-Bahn</option>
+          <option value='59'>Berchtesgaden --- RB69/89 Ems-B&ouml;rde-Bahn</option>
+          <option value='60'>kein Zugverkehr --- WR DT</option>
+          <option value='61'>Ansage beachten</option>
+          <option value='62'>Fu&szlig;ballsonderzug</option>
+          <option value='63'>Gesellschaftssonderzug</option>
+          <option value='64'>1. Zugteil</option>
+          <option value='65'>2. Zugteil</option>
+          <option value='66'>Wagenreihung bitte Ansage beachten --- Entenm&ouml;rder</option>
+          <option value='67'>Rheingold</option>
+          <option value='68'>Dageb&uuml;ll  --- RB41</option>
+          <option value='69'>Hellas-Express</option>
+          <option value='70'>Istanbul-Express</option>
+          <option value='71'>WR AB</option>
+       
+          <!-- 41 -->
+                          </select>
+
+
+
+      </div>
+      <div class='small-group'>
+        <label for='info2'>Information 2</label>
+        <select id='info2' name='info2' style='background: blue; color:yellow;'>
+          <option value='32'>Information ausw&auml;hlen</option>
+          <option value='34'>ca 5min sp&auml;ter</option>
+          <option value='35'>ca 10min sp&auml;ter</option>
+          <option value='36'>ca 15min sp&auml;ter</option>
+          <option value='37'>ca 20min sp&auml;ter</option>
+          <option value='38'>ca 25min sp&auml;ter</option>
+          <option value='39'>ca 30min sp&auml;ter</option>
+          <option value='40'>ca 40min sp&auml;ter</option>
+          <option value='41'>ca 50min sp&auml;ter</option>
+          <option value='42'>ca 60min sp&auml;ter</option>
+          <option value='43'>&uuml;ber 120min versp&auml;tet</option>
+          <option value='44'>unbestimmt versp&auml;tet</option>
+          <option value='45'>Zug f&auml;llt aus</option>
+          <option value='46'>Zugzielanzeiger ist gest&ouml;rt</option>
+          <option value='47'>heute von Gleis 1</option>
+          <option value='48'>heute von Gleis 2</option>
+          <option value='49'>heute von Gleis 3</option>
+          <option value='50'>heute von Gleis 4</option>
+          <option value='51'>heute von Gleis 5</option>
+          <option value='52'>heute von Gleis 6</option>
+          <option value='53'>heute von Gleis 8</option>
+          <option value='54'>heute von Gleis 9</option>
+          <option value='55'>Reservierungspflicht ---heute von Gleis 10</option>
+          <option value='56'>Fahrradmitnahme reservierungspflichtig ---heute von Gleis 11</option>
+          <option value='57'>Ein Wagen fehlt ---heute von Gleis 12</option>
+          <option value='58'>Zugteilung beachten ---heute von Gleis 13</option>
+          <option value='59'>kein Zugverkehr</option>
+          <option value='60'>Novosibisk Woronesch ----Ansage beachten</option>
+          <option value='61'>Zugdurchfahrt</option>
+          <option value='62'>Nicht einsteigen</option>
+          <option value='63'>Sonderzug</option>
+          <option value='64'>Zug wird rangiert</option>
+          <option value='65'>Zug endet hier</option>
+          <option value='66'>Ersatz durch Bus</option>
+          <option value='67'>Besonderer Fahrpreis</option>
+          <option value='68'>Zug wird umgeleitet ---H&auml;lt nicht &uuml;berall</option>
+          <option value='69'>Zugteilung in HP</option>
+          <option value='70'>Nur 2.Klasse</option>
+          <option value='71'>ca 90 Min sp&auml;ter</option>
+          <option value='72'>ca 120 Min sp&auml;ter</option>
+          <option value='73'>ohne gastronomisches Angebot </option>
+          <option value='74'>Leer</option>
+        </select>
+      </div>
+      <div class='small-group'>
+        <label for='zwischenziel'>Zwischenziel</label>
+        <select id='zwischenziel' name='zwischenziel' style='background: blue; color:white;'>
+          <option value='103'>Zwischenziel ausw&auml;hlen</option>
+          <option value='104'>K&ouml;ln Hbf</option>
+          <option value='105'>Horrem • D&uuml;ren • Eschweiler</option>
+          <option value='106'>Horrem • Buir</option>
+          <option value='107'>K&ouml;ln • D&uuml;sseldorf  • Duisburg</option>
+          <option value='108'>K&ouml;ln • D&uuml;sseldorf • Dortmund</option>
+          <option value='109'>K&ouml;ln Hbf • K-Deutz • K-M&uuml;lheim</option>
+          <option value='110'>K&ouml;ln • Troisdorf • BN-Beul</option>
+          <option value='111'>K&ouml;ln • Troisdorf • Linz (Rh.)</option>
+          <option value='35'>K&ouml;ln • K&ouml;ln/Bonn Flugh. • Troisdorf</option>
+          <option value='36'>Troisdorf • Siegburg/Bonn</option>
+          <option value='37'>K&ouml;ln • K-M&uuml;lheim • SG-Ohligs</option>
+          <option value='38'>K&ouml;ln • Hagen • M&uuml;nster</option>
+          <option value='39'>K&ouml;ln • Wuppertal • M&uuml;nster</option>
+          <option value='40'>K&ouml;ln Hbf • Hennef • Au</option>
+          <option value='41'>Rheydt • M&ouml;nchengladbach</option>
+          <option value='42'>Grevenbroich • Neuss</option>
+          <option value='43'>Grevenbroich • Rheydt</option>
+          <option value='44'>Grevenbroich • Mgladbach</option>
+          <option value='45'>Pulheim • Grevenbroich</option>
+          <option value='46'>Bergheim • Bedburg</option>
+          <option value='47'>Bergheim</option>
+          <option value='48'>K&ouml;ln • D&uuml;sseldorf</option>
+          <option value='49'>K&ouml;ln Hbf • K&ouml;ln/Bonn Flugh.</option>
+          <option value='50'>K&ouml;ln-Deutz • K&ouml;ln/Bonn Flugh.</option>
+          <option value='51'>K&ouml;ln-Hansaring • K&ouml;ln Hbf</option>
+          <option value='52'>L&ouml;venich • Horrem • Buir</option>
+          <option value='53'>L&ouml;venich • Frechen-K&ouml;nigsdorf</option>
+          <option value='54'>Bergheim • Grevenbroich</option>
+          <option value='55'>Leer</option>
+          <option value='56'>K&ouml;ln Hbf • Troisdorf</option>
+          <option value='57'>K&ouml;ln Hbf • Siegburg/Bonn</option>
+          <option value='58'>K&ouml;ln Hbf • K&ouml;ln Messe/Deutz</option>
+          <option value='59'>K&ouml;ln Messe/Deutz</option>
+          <option value='60'>K Messe/Deutz • K&ouml;ln/Bonn Flugh.</option>
+          <option value='60'>Frankfurt/M. &#5867; G&ouml;ttingen</option>
+          <option value='61'>N&uuml;rnberg &#5867; Erfurt</option>
+          <option value='62'>Frankfurt (O) &#5867; Minsk</option>
+          <option value='63'>Erfurt &#5867; N&uuml;rnberg</option>
+          <option value='64'>K&ouml;ln &#5867; Freiburg</option>
+          <option value='65'>Hannover &#5867; W&uuml;rzburg</option>
+          <option value='66'>Mannheim &#5867; Heidelberg</option>
+          <option value='67'>Praha hl.n &#5867; Bratislava</option>
+          <option value='68'>Rzepin &#5867; Konin</option>
+          <option value='69'>Erfurt &#5867; Stra&szlig;bourg</option>
+          <option value='70'>Berlin &#5867; Dresden</option>
+          <option value='71'>Lindau &#5867; Winterthur</option>
+          <option value='72'>Hannover &#5867; Mannheim</option>
+          <option value='73'>Augsburg &#5867; Kaiserslautern</option>
+          <option value='74'>Zagreb &#5867; Beograd &#5867; Sofia</option>
+          <option value='75'>Erfurt &#5867; Koblenz</option>
+          <option value='76'>Villach &#5867; Firenze SMN</option>
+          <option value='77'>Salzburg &#5867; Villach</option>
+          <option value='78'>Warszawa &#5867; Lublin</option>
+          <option value='79'>Hannover &#5867; Hamm (Westf)</option>
+          <option value='80'>Hamburg &#5867; Nieb&uuml;ll</option>
+          <option value='81'>Hannover &#5867; Amersfoort</option>
+          <option value='82'>N&uuml;rnberg &#5867; Passau </option>
+          <option value='83'>Kufstein</option>
+          <option value='84'>Mainz &#5867; Mgladbach &#5867; Venlo</option>
+          <option value='85'>Koblenz &#5867;Mannheim &#5867; Luzern</option>
+          <option value='86'>Helmstedt &#5867; Osnabr&uuml;ck &#5867; Utrecht</option>
+          <option value='87'>Ljubljana &#5867; Beograd &#5867; Skopje</option>
+          <option value='88'>Puttgarden &#5867; Rodby Faerge</option>
+          <option value='89'>Erfurt &#5867; Frankfurt/M.</option>
+          <option value='90'>Frankfurt/M. &#5867; Erfurt</option>
+          <option value='91'>Eichtersheim-Michelfeld</option>
+          <option value='92'>Oberhof(Th&uuml;r) &#5867; Naumburg(Saale)</option>
+          <option value='93'>Sangerhausen &#5867; Fulda</option>
+          <option value='94'>Eisenach &#5867; N&uuml;rnberg</option>
+          <option value='95'>Kassel-Wilhelmsh&ouml;he &#5867; Soest</option>
+          <option value='96'>Leer1</option>
+          <option value='97'>Leer2</option>
+          <option value='98'>Leer3</option>
+          <option value='99'>Leer4</option>
+          <option value='100'>Leer5</option>
+          <option value='101'>Leer6</option>
+          <option value='102'>Leer7</option>
+        </select>
+      </div>
+      <div class='small-group'>
+        <label for='ziel'>Ziel</label>
+        <select id='ziel' name='ziel' style='background: blue; color:white;'>
+          <option value='32'>Ziel ausw&auml;hlen</option>
+          <option value='33'>Leipzig</option>
+          <option value='34'>Gera</option>
+          <option value='35'>K&ouml;ln</option>
+          <option value='36'>L&uuml;beck</option>
+          <option value='37'>Gotha</option>
+          <option value='38'>Fulda</option>
+          <option value='39'>Frankfurt/M</option>
+          <option value='40'>Bad Hersfeld</option>
+          <option value='41'>Oberstdorf</option>
+          <option value='42'>G&ouml;ttingen</option>
+          <option value='43'>Eichenberg</option>
+          <option value='44'>Kassel Hbf</option>
+          <option value='45'>Kassel Wilhelmsh&ouml;he</option>
+          <option value='46'>Melsungen--Durres</option>
+          <option value='47'>D&uuml;sseldorf</option>
+          <option value='48'>Hamburg-Altona</option>
+          <option value='49'>Hamburg Hbf</option>
+          <option value='50'>Flensburg</option>
+          <option value='51'>Aachen</option>
+          <option value='52'>Paderborn</option>
+          <option value='53'>Gerstungen</option>
+          <option value='54'>Eisenach</option>
+          <option value='55'>Halle</option>
+          <option value='56'>Erfurt</option>
+          <option value='57'>Weimar</option>
+          <option value='58'>Dortmund</option>
+          <option value='59'>Chemnitz</option>
+          <option value='60'>Hannover Messe/Laatzen</option>
+          <option value='61'>G&ouml;schwitz</option>
+          <option value='62'>Glauchau</option>
+          <option value='63'>Apolda</option>
+          <option value='64'>Berlin-Spandau</option>
+          <option value='65'>Berlin Hbf</option>
+          <option value='66'>Wiesloch-Walldorf</option>
+          <option value='67'>Saratow</option>
+          <option value='68'>Moskva</option>
+          <option value='69'>M&uuml;nchen Hbf</option>
+          <option value='70'>Basel SBB</option>
+          <option value='71'>Interlaken Ost</option>
+          <option value='72'>Budapest</option>
+          <option value='73'>Warszawa</option>
+          <option value='74'>Paris Est</option>
+          <option value='75'>Praha hl.n</option>
+          <option value='76'>Z&uuml;rich HB</option>
+          <option value='77'>Stuttgart</option>
+          <option value='78'>Saarbr&uuml;cken</option>
+          <option value='79'>Istanbul</option>
+          <option value='80'>Bruxelles Midi</option>
+          <option value='81'>Roma Termini </option>
+          <option value='82'>Zagreb</option>
+          <option value='83'>Kiev Pass</option>
+          <option value='84'>K&ouml;ln Hbf</option>
+          <option value='85'>Westerland (Sylt) </option>
+          <option value='86'>Amsterdam</option>
+          <option value='87'>Wien</option>
+          <option value='88'>Marseille</option>
+          <option value='89'>Hoek van Holland</option>
+          <option value='90'>Barcelona</option>
+          <option value='91'>Athen</option>
+          <option value='92'>K&oslash;benhavn H</option>
+          <option value='93'>Wiesbaden</option>
+          <option value='94'>Dresden</option>
+          <option value='95'>Waldangelloch</option>
+          <option value='96'>Grindelwald</option>
+          <option value='97'>Gdinya Gl</option>
+          <option value='98'>Inverness</option>
+          <option value='99'>Koblenz</option>
+          <option value='100'>Lebach-Jabach</option>
+          <option value='101'>Skopje</option>
+          <option value='102'>Erfurt-Nord</option>
+          <option value='103'>Berlin-Johanesstift</option>
+          <option value='104'>Jerewan</option>
+          <option value='105'>Wladwiostok</option>
+          <option value='106'>Peking</option>
+          <option value='107'>London</option>
+          <option value='108'>Chisinau</option>
+          <option value='109'>Bucuresti</option>
+          <option value='110'>Trondheim</option>
+          <option value='111'>Palermo</option>
+        </select>
+
+      </div>
+                        <div class='medium-group'>
+         <div class='btn' id='anzeigen' style='background: #357f35; color:white; '>Inhalte anzeigen</div>
+      </div>
+      <div class='medium-group'>
+         <input class='btn' id='clear' type='reset' value='Felder leeren' style='background: orange; color:white'>
+      </div>
+      <div class='medium-group'>
+         <div class='btn' id='leeren' style='background: #d63434; color:white'>Module leeren</div> 
+      </div>
+
+
+
+    </div>
+  </form>
+<center><h4 style='opacity: 0.4; color:white'>Alex Kohl 2024</h4></center>
+ <script>
+   document.getElementById('anzeigen').onclick = function () {
+    auswahl_betreiber = document.querySelector('#betreiber');
+    betreiber = auswahl_betreiber.value;
+ 
+    auswahl_gattung = document.querySelector('#gattung');
+    gattung = auswahl_gattung.value;
+
+    zugnummer_input = document.getElementById('zugnummer');
+    zugnummer = zugnummer_input.value;
+
+    abstd_input = document.getElementById('abstd');
+    abstd = abstd_input.value;
+    
+    abmin_input = document.getElementById('abmin');
+    abmin = abmin_input.value;
+
+    auswahl_info1 = document.querySelector('#info1');
+    info1 = auswahl_info1.value;
+
+    auswahl_info2 = document.querySelector('#info2');
+    info2 = auswahl_info2.value;
+
+    auswahl_zwischenziel = document.querySelector('#zwischenziel');
+    zwischenziel = auswahl_zwischenziel.value;
+
+    auswahl_ziel = document.querySelector('#ziel');
+    ziel = auswahl_ziel.value;
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', 'flip?b=' + betreiber + '&g=' + gattung + '&n=' + zugnummer + '&s=' + abstd + '&m=' + abmin + '&i1=' + info1 + '&i2=' + info2 + '&d=' + zwischenziel + '&z=' + ziel + '', true);
+    xhttp.send();
+   };
+
+  document.getElementById('leeren').onclick = function () {
+   var xhttp = new XMLHttpRequest();
+   xhttp.open('GET', 'clear', true);
+   xhttp.send();
+  };       
+ </script>  
+</body>
+</html>
+
