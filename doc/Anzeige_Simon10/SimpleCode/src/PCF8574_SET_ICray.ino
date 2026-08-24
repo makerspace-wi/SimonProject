@@ -3,8 +3,9 @@
  
 const uint8_t PCF_ADDR = 0x38;
 int val = 0;
-int value = 0;
-String inStr = "";      // a string to hold incoming data
+int value = 255; // initial value for all ports high (inputs/high-Z)
+int maxValue = 63; // max value for 6 bit output
+String inStr = ""; // a string to hold incoming data
 
 // FUNCTIONS ------------------------------------
 int getNum(String strNum) // Check if realy numbers
@@ -14,11 +15,16 @@ int getNum(String strNum) // Check if realy numbers
   {
     if (!isDigit(strNum[i])) 
     {
-      Serial.println(F("Error: no number from 0 - 255"));
+      Serial.println("Error: no number from 0 - " + String(maxValue));
       return value;
     }
   }
   return strNum.toInt();
+}
+
+int bin2gray(byte n)
+{
+  return 0b11111111 & ~(n ^ (n >> 1));
 }
 // End Funktions --------------------------------
  
@@ -28,19 +34,20 @@ void evalSerialData()
   if (inStr.length() <4)
   { 
     val = getNum(inStr);
-    if (val > 255) 
+    if (val > maxValue) 
     {
-      Serial.println(F("Error: > 255"));
+      Serial.println("Error: > " + String(maxValue));
     }
     else  
     {
-      value = val;
-    }   
+      value = bin2gray(val);
+    }
+    Serial.println("Value: " + String(val) + " -> InvGray: " + String(value));
     Serial.print(F("Value:"));
   }
   else
   {
-    Serial.println(F("Error: max 3 digits"));
+    Serial.println(F("Error: max 2 digits"));
     Serial.print(F("Value:"));
   }
 }
