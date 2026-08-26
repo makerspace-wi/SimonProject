@@ -321,9 +321,6 @@ Serial.println("Betreiber: " + String(betreiber) + " Gattung: " + String(gattung
   }
   
   
-
-
- 
   // Abfahrtszeit
   if (abstd != 0 && abmin != 0)
   {
