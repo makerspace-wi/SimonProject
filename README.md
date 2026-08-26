@@ -86,6 +86,17 @@ Hinweis:
 - Der Endpoint `/flip` steuert zusaetzlich 3 I2C-Module (ADTrans) ueber `I2C_ADDR_1..3`.
 - Je nach Laenge der Zugnummer werden Ziffern auf UART-Fallblattmodule und I2C-Module verteilt.
 
+### 4) Zweites Modul (direkt im Programm gesteuert)
+
+Die zweite serielle Schnittstelle (19200 Baud, BREAK-Protokoll) wird ohne eigenen HTTP-Endpoint direkt im Programmablauf gesteuert.
+
+Aktuell erfolgt die Ansteuerung am Ende von `/flip` mit:
+
+- Zieladresse aus `MODULE2_DIRECT_ADDR`
+- Position aus dem bereits berechneten Feld `ziel`
+
+Damit geht die Kommunikation fuer das zweite Modul nicht separat ueber den Webserver.
+
 ## I2C-Konfiguration
 
 Standardwerte in [platformio.ini](platformio.ini):
@@ -109,6 +120,10 @@ Aktueller Stand gemaess [platformio.ini](platformio.ini) und [src/main.cpp](src/
 - Signal-UART (`Serial2`, 4800 Baud, 8E2):
   - TX: GPIO17 (`UART_SIGNAL_TX_PIN`)
   - RX: GPIO16 (`UART_SIGNAL_RX_PIN`)
+- Modul-2-UART (`Serial1`, 19200 Baud, 8N1, BREAK-faehig):
+  - TX: GPIO26 (`UART_MODULE2_TX_PIN`)
+  - RX: GPIO27 (`UART_MODULE2_RX_PIN`)
+  - Optional RS485 Driver-Enable: `UART_MODULE2_RS485_DE_PIN` (Standard `-1` = aus)
 - I2C (`Wire`):
   - Aktuell keine festen Pins im Build-Flag gesetzt.
   - Es werden daher die Board-Defaults verwendet (`Wire.begin()`).

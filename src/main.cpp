@@ -38,6 +38,10 @@ void setflip(byte adress, byte flip);
 void sendByte(byte i2cAddress, byte zahl);
 byte bin2grayi(byte n);
 
+void module2SendCommand(uint8_t command, uint8_t address, const uint8_t *payload, size_t payloadLen);
+void module2SetPosition(uint8_t address, uint8_t position);
+void updateModule2Direct();
+
 #ifndef UART_DEBUG_BAUD
 #define UART_DEBUG_BAUD 115200
 #endif
@@ -52,6 +56,34 @@ byte bin2grayi(byte n);
 
 #ifndef UART_SIGNAL_TX_PIN
 #define UART_SIGNAL_TX_PIN 17
+#endif
+
+#ifndef UART_MODULE2_BAUD
+#define UART_MODULE2_BAUD 19200
+#endif
+
+#ifndef UART_MODULE2_RX_PIN
+#define UART_MODULE2_RX_PIN 27
+#endif
+
+#ifndef UART_MODULE2_TX_PIN
+#define UART_MODULE2_TX_PIN 26
+#endif
+
+#ifndef UART_MODULE2_BREAK_BITS
+#define UART_MODULE2_BREAK_BITS 24
+#endif
+
+#ifndef UART_MODULE2_RS485_DE_PIN
+#define UART_MODULE2_RS485_DE_PIN -1
+#endif
+
+#ifndef MODULE2_DIRECT_ENABLED
+#define MODULE2_DIRECT_ENABLED 1
+#endif
+
+#ifndef MODULE2_DIRECT_ADDR
+#define MODULE2_DIRECT_ADDR 0x0A
 #endif
 
 #ifndef I2C_ADDR_1
@@ -102,8 +134,16 @@ void setup()
 {
   Serial.begin(UART_DEBUG_BAUD);
   Serial2.begin(UART_SIGNAL_BAUD, SERIAL_8E2, UART_SIGNAL_RX_PIN, UART_SIGNAL_TX_PIN);
+  Serial1.begin(UART_MODULE2_BAUD, SERIAL_8N1, UART_MODULE2_RX_PIN, UART_MODULE2_TX_PIN);
   Serial.println("Debug-UART aktiv (Serial)");
   Serial.println("Signal-UART aktiv (Serial2)");
+  Serial.println("Modul-2-UART aktiv (Serial1, BREAK + FF Cx Protokoll)");
+
+#if UART_MODULE2_RS485_DE_PIN >= 0
+  pinMode(UART_MODULE2_RS485_DE_PIN, OUTPUT);
+  digitalWrite(UART_MODULE2_RS485_DE_PIN, LOW);
+#endif
+
 #if (I2C_SDA_PIN >= 0) && (I2C_SCL_PIN >= 0)
   Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
 #else
@@ -297,6 +337,8 @@ Serial.println("Betreiber: " + String(betreiber) + " Gattung: " + String(gattung
   setflip(infoadress2, info2);
   setflip(zieladress, ziel);
   setflip(zwischenzieladress, zwischenziel);
+
+  updateModule2Direct();
 }
 
 // convert number to Gray code for the ADTrans modules, because they are not binary coded
@@ -348,6 +390,63 @@ void setflip(byte adress, byte flip)
 
   laststatus = 1;
 } // End setflip()
+
+void module2SendCommand(uint8_t command, uint8_t address, const uint8_t *payload, size_t payloadLen)
+{
+  uint8_t frame[8];
+  size_t frameLen = 0;
+
+  frame[frameLen++] = 0xFF;
+  frame[frameLen++] = command;
+  frame[frameLen++] = address;
+
+  for (size_t i = 0; i < payloadLen && frameLen < sizeof(frame); ++i)
+  {
+    frame[frameLen++] = payload[i];
+  }
+
+#if UART_MODULE2_RS485_DE_PIN >= 0
+  digitalWrite(UART_MODULE2_RS485_DE_PIN, HIGH);
+  delayMicroseconds(80);
+#endif
+
+  // Protokoll fordert BREAK vor dem Frame.
+  const uint32_t breakUs = (static_cast<uint32_t>(UART_MODULE2_BREAK_BITS) * 1000000UL + UART_MODULE2_BAUD - 1) / UART_MODULE2_BAUD;
+  Serial1.flush();
+  Serial1.end();
+  pinMode(UART_MODULE2_TX_PIN, OUTPUT);
+  digitalWrite(UART_MODULE2_TX_PIN, LOW);
+  delayMicroseconds(breakUs);
+  digitalWrite(UART_MODULE2_TX_PIN, HIGH);
+  delayMicroseconds(40);
+
+  Serial1.begin(UART_MODULE2_BAUD, SERIAL_8N1, UART_MODULE2_RX_PIN, UART_MODULE2_TX_PIN);
+
+  while (Serial1.available() > 0)
+  {
+    Serial1.read();
+  }
+
+  Serial1.write(frame, frameLen);
+  Serial1.flush();
+
+#if UART_MODULE2_RS485_DE_PIN >= 0
+  digitalWrite(UART_MODULE2_RS485_DE_PIN, LOW);
+#endif
+}
+
+void module2SetPosition(uint8_t address, uint8_t position)
+{
+  uint8_t payload[1] = {position};
+  module2SendCommand(0xC0, address, payload, 1);
+}
+
+void updateModule2Direct()
+{
+  #if MODULE2_DIRECT_ENABLED
+  module2SetPosition(static_cast<uint8_t>(MODULE2_DIRECT_ADDR), static_cast<uint8_t>(ziel & 0xFF));
+  #endif
+}
 
 
 void sendByte(byte i2cAddress, byte zahl)
