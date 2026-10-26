@@ -207,3 +207,107 @@ Pruefung/Fix:
 
 - Das Projekt ist fuer die aktuelle ESP32-PlatformIO-Umgebung ausgelegt.
 - Bei Problemen zuerst Build lokal pruefen und die Werte in [platformio.ini](platformio.ini) kontrollieren.
+
+1. OMEGA-Modul über RS485 ansteuern
+Das OMEGA-Modul hängt an Serial1 (RS485, Pins 26/27, 19200 Baud, 8N1). Du hast bereits die Funktion module2SetPosition(), die den Befehl 0xC0 (Set Position) sendet. Diese kannst du für das OMEGA-Modul verwenden – aber mit der richtigen Adresse deines OMEGA-Moduls.
+
+Statt:
+
+cpp
+setflip(logoadress, betreiber);
+schreibst du:
+
+cpp
+// Betreiber an OMEGA-Modul über RS485 senden
+// MODULE2_DIRECT_ADDR muss die tatsächliche Adresse des OMEGA-Moduls sein
+module2SetPosition(static_cast<uint8_t>(MODULE2_DIRECT_ADDR), static_cast<uint8_t>(betreiber & 0xFF));
+
+
+Super einfach, wir machen es Schritt für Schritt.
+Das Tool ist ein kleines Programm, das über die serielle RS485-Schnittstelle Befehle an Module mit Adresse 0 bis 255 sendet.
+
+Siehe auch: README.md
+
+Was das Tool macht
+
+Es sendet immer ein Telegramm im Format: BREAK + FF + COMMAND + ADDR + optionale Daten.
+
+Du gibst an:
+Port, Command, und Zieladresse(n).
+
+Zieladressen können sein:
+eine Adresse, ein Bereich oder alle 0..255.
+
+Einmalige Einrichtung
+
+Terminal im Projekt öffnen und in den Ordner wechseln:
+cd "/Users/dieter/Documents/PlatformIO/Projects/Simon Project/omega-rs485-tool"
+
+Virtuelle Umgebung anlegen:
+python3 -m venv .venv
+
+Aktivieren:
+source .venv/bin/activate
+
+Abhängigkeit installieren:
+pip install -r requirements.txt
+
+Erster Test ohne Senden
+
+Damit siehst du nur, was gesendet würde:
+python omega_rs485_tool.py --port /dev/cu.usbserial-0001 --cmd C8 --addr 29 --dry-run
+
+Wenn das gut aussieht: --dry-run entfernen.
+
+Einfaches echtes Senden
+
+TEST-Command C8 an Adresse 29:
+python omega_rs485_tool.py --port /dev/cu.usbserial-0001 --cmd C8 --addr 29
+
+An alle Adressen 0..255:
+python omega_rs485_tool.py --port /dev/cu.usbserial-0001 --cmd C8 --all
+
+Beispiel mit Antwort lesen
+
+Firmware-Version lesen, erwartet 2 Antwort-Bytes:
+python omega_rs485_tool.py --port /dev/cu.usbserial-0001 --cmd D4 --all --read-bytes 2 --delay-ms 5
+
+Ausgabe zeigt dann pro Adresse TX und ggf. RX.
+
+Häufige Stolpersteine
+
+Falscher Port: dann kommt meist sofort ein Öffnungsfehler.
+
+Falsche Baudrate: hier ist 19200 Standard.
+
+RS485-Richtung/Adapter: bei manchen Adaptern muss DE/RE korrekt geschaltet sein.
+
+Erst immer mit einer Adresse testen, dann Bereich oder all.
+
+Wenn du willst, gehen wir jetzt zusammen live durch deinen ersten echten Lauf, und ich sage dir genau, welchen Befehl du als Nächstes eingibst.
+
+
+Top, dann ist hier Kommando 2 (Full-Scan 0..255 mit TEST-Befehl C8):
+
+~/.platformio/penv/bin/python omega_rs485_tool.py --port /dev/cu.usbserial-0001 --cmd C8 --all --delay-ms 5
+
+Optional erst als Trockenlauf:
+
+~/.platformio/penv/bin/python omega_rs485_tool.py --port /dev/cu.usbserial-0001 --cmd C8 --all --delay-ms 5 --dry-run
+
+So gibst du den seriellen Port wieder frei:
+
+Laufendes Python-Skript stoppen
+Im Terminal, in dem das Tool läuft: Control + C
+Erst dadurch wird die serielle Verbindung geschlossen.
+Virtuelle Umgebung verlassen
+Befehl: deactivate
+Falls Port trotzdem noch blockiert ist
+Prüfen, welcher Prozess den Port hält:
+lsof | grep cu.usbserial
+Dann den betreffenden Prozess beenden:
+kill -9 PID
+Kurz gesagt:
+
+Für den Port ist vor allem Control + C wichtig.
+deactivate beendet nur die venv, nicht automatisch ein laufendes Skript.

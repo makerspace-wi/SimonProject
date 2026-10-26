@@ -41,6 +41,9 @@ byte bin2grayi(byte n);
 void module2SendCommand(uint8_t command, uint8_t address, const uint8_t *payload, size_t payloadLen);
 void module2SetPosition(uint8_t address, uint8_t position);
 void updateModule2Direct();
+void handleUsbBridge();
+void processUsbBridgeLine(char *line);
+bool parseBridgeByte(const char *token, uint8_t &out);
 
 #ifndef UART_DEBUG_BAUD
 #define UART_DEBUG_BAUD 115200
@@ -51,11 +54,11 @@ void updateModule2Direct();
 #endif
 
 #ifndef UART_SIGNAL_RX_PIN
-#define UART_SIGNAL_RX_PIN 16
+#define UART_SIGNAL_RX_PIN 27
 #endif
 
 #ifndef UART_SIGNAL_TX_PIN
-#define UART_SIGNAL_TX_PIN 17
+#define UART_SIGNAL_TX_PIN 26
 #endif
 
 #ifndef UART_MODULE2_BAUD
@@ -63,11 +66,11 @@ void updateModule2Direct();
 #endif
 
 #ifndef UART_MODULE2_RX_PIN
-#define UART_MODULE2_RX_PIN 27
+#define UART_MODULE2_RX_PIN 16
 #endif
 
 #ifndef UART_MODULE2_TX_PIN
-#define UART_MODULE2_TX_PIN 26
+#define UART_MODULE2_TX_PIN 17
 #endif
 
 #ifndef UART_MODULE2_BREAK_BITS
@@ -75,7 +78,17 @@ void updateModule2Direct();
 #endif
 
 #ifndef UART_MODULE2_RS485_DE_PIN
-#define UART_MODULE2_RS485_DE_PIN -1
+#define UART_MODULE2_RS485_DE_PIN 4
+#endif
+
+// Antwortfenster nach jedem Frame (ms): Modul-RX wird gelesen und an USB
+// weitergereicht. Ueber Build-Flag anpassbar.
+#ifndef UART_MODULE2_RX_WINDOW_MS
+#define UART_MODULE2_RX_WINDOW_MS 100
+#endif
+
+#ifndef UART_MODULE2_RX_BUF_LEN
+#define UART_MODULE2_RX_BUF_LEN 64
 #endif
 
 #ifndef MODULE2_DIRECT_ENABLED
@@ -83,7 +96,7 @@ void updateModule2Direct();
 #endif
 
 #ifndef MODULE2_DIRECT_ADDR
-#define MODULE2_DIRECT_ADDR 0x0A
+#define MODULE2_DIRECT_ADDR 0x0D
 #endif
 
 #ifndef I2C_ADDR_1
@@ -134,10 +147,16 @@ void setup()
 {
   Serial.begin(UART_DEBUG_BAUD);
   Serial2.begin(UART_SIGNAL_BAUD, SERIAL_8E2, UART_SIGNAL_RX_PIN, UART_SIGNAL_TX_PIN);
-  Serial1.begin(UART_MODULE2_BAUD, SERIAL_8N1, UART_MODULE2_RX_PIN, UART_MODULE2_TX_PIN);
   Serial.println("Debug-UART aktiv (Serial)");
   Serial.println("Signal-UART aktiv (Serial2)");
-  Serial.println("Modul-2-UART aktiv (Serial1, BREAK + FF Cx Protokoll)");
+  Serial.println("Modul-2-UART bereit (Serial1, BREAK + FF Cx Protokoll)");
+  Serial.println("USB-Bridge aktiv: Befehl als 'C0 0D 14' oder 'M2 C0 0D 14' senden");
+  Serial.println("USB-Bridge: Modul-Antworten werden als 'M2 RX: ...' ausgegeben");
+  Serial.println("USB-Bridge Hilfe: 'HELP'");
+
+  // TX im Idle stabil HIGH halten; UART1 wird nur waehrend einer Sendung aktiviert.
+  pinMode(UART_MODULE2_TX_PIN, OUTPUT);
+  digitalWrite(UART_MODULE2_TX_PIN, HIGH);
 
 #if UART_MODULE2_RS485_DE_PIN >= 0
   pinMode(UART_MODULE2_RS485_DE_PIN, OUTPUT);
@@ -173,6 +192,7 @@ void setup()
 
 void loop()
 {
+  handleUsbBridge();
   server.handleClient();
 #if defined(ARDUINO_ARCH_ESP8266)
   MDNS.update();
@@ -328,14 +348,17 @@ Serial.println("Betreiber: " + String(betreiber) + " Gattung: " + String(gattung
     setflip(minadress, map(abmin, 0, 59, 34, 93));
   }
 
-  setflip(logoadress, betreiber);
+  //setflip(logoadress, betreiber);
+  module2SetPosition(static_cast<uint8_t>(MODULE2_DIRECT_ADDR), static_cast<uint8_t>(betreiber & 0xFF));
   setflip(gattungadress, gattung);
   setflip(infoadress, info1);
   setflip(infoadress2, info2);
   setflip(zieladress, ziel);
   setflip(zwischenzieladress, zwischenziel);
 
-  updateModule2Direct();
+  //updateModule2Direct();
+
+  server.send(200, "text/plain", "OK");
 }
 
 // convert number to Gray code for the ADTrans modules, because they are not binary coded
@@ -370,6 +393,8 @@ void clear()
 
     laststatus = 0;
   }
+
+  server.send(200, "text/plain", "OK");
 }
 
 // Gibt die Daten aus nach dem Krone-Protokoll
@@ -403,15 +428,24 @@ void module2SendCommand(uint8_t command, uint8_t address, const uint8_t *payload
   }
 
 #if UART_MODULE2_RS485_DE_PIN >= 0
+  // TX zuerst auf ruhigen Idle-Pegel bringen, erst dann RS485-Treiber aktivieren.
+  Serial1.end();
+  pinMode(UART_MODULE2_TX_PIN, OUTPUT);
+  digitalWrite(UART_MODULE2_TX_PIN, HIGH);
+  delayMicroseconds(20);
+
   digitalWrite(UART_MODULE2_RS485_DE_PIN, HIGH);
   delayMicroseconds(80);
+#else
+  Serial1.end();
+  pinMode(UART_MODULE2_TX_PIN, OUTPUT);
+  digitalWrite(UART_MODULE2_TX_PIN, HIGH);
+  delayMicroseconds(20);
 #endif
 
   // Protokoll fordert BREAK vor dem Frame.
   const uint32_t breakUs = (static_cast<uint32_t>(UART_MODULE2_BREAK_BITS) * 1000000UL + UART_MODULE2_BAUD - 1) / UART_MODULE2_BAUD;
-  Serial1.flush();
-  Serial1.end();
-  pinMode(UART_MODULE2_TX_PIN, OUTPUT);
+
   digitalWrite(UART_MODULE2_TX_PIN, LOW);
   delayMicroseconds(breakUs);
   digitalWrite(UART_MODULE2_TX_PIN, HIGH);
@@ -428,8 +462,44 @@ void module2SendCommand(uint8_t command, uint8_t address, const uint8_t *payload
   Serial1.flush();
 
 #if UART_MODULE2_RS485_DE_PIN >= 0
+  // RS485-Treiber sofort nach dem Senden freigeben, damit das Modul antworten kann.
   digitalWrite(UART_MODULE2_RS485_DE_PIN, LOW);
 #endif
+
+  // Antwortfenster: Modul-RX einsammeln und an den USB-Monitor weiterreichen.
+  uint8_t rxBuf[UART_MODULE2_RX_BUF_LEN];
+  size_t rxLen = 0;
+  const uint32_t rxStart = millis();
+  while ((millis() - rxStart) < UART_MODULE2_RX_WINDOW_MS && rxLen < sizeof(rxBuf))
+  {
+    while (Serial1.available() > 0 && rxLen < sizeof(rxBuf))
+    {
+      rxBuf[rxLen++] = static_cast<uint8_t>(Serial1.read());
+    }
+  }
+
+  // UART wieder deaktivieren, damit keine ungewollten TX-Flanken zwischen Sendungen entstehen.
+  Serial1.end();
+  pinMode(UART_MODULE2_TX_PIN, OUTPUT);
+  digitalWrite(UART_MODULE2_TX_PIN, HIGH);
+
+  Serial.print("M2 TX: ");
+  for (size_t i = 0; i < frameLen; i++)
+    Serial.printf("%02X ", frame[i]);
+  Serial.printf("(break %lu us)\n", (unsigned long)breakUs);
+
+  Serial.print("M2 RX: ");
+  if (rxLen == 0)
+  {
+    Serial.print("<none>");
+  }
+  for (size_t i = 0; i < rxLen; i++)
+  {
+    Serial.printf("%02X", rxBuf[i]);
+    if (i + 1 < rxLen)
+      Serial.print(' ');
+  }
+  Serial.println();
 }
 
 void module2SetPosition(uint8_t address, uint8_t position)
@@ -443,6 +513,141 @@ void updateModule2Direct()
   #if MODULE2_DIRECT_ENABLED
   module2SetPosition(static_cast<uint8_t>(MODULE2_DIRECT_ADDR), static_cast<uint8_t>(ziel & 0xFF));
   #endif
+}
+
+void handleUsbBridge()
+{
+  static char lineBuf[128];
+  static size_t lineLen = 0;
+
+  while (Serial.available() > 0)
+  {
+    const int in = Serial.read();
+    if (in < 0)
+      break;
+
+    const char c = static_cast<char>(in);
+
+    if (c == '\n' || c == '\r')
+    {
+      if (lineLen > 0)
+      {
+        lineBuf[lineLen] = '\0';
+        processUsbBridgeLine(lineBuf);
+        lineLen = 0;
+      }
+      continue;
+    }
+
+    if (lineLen < (sizeof(lineBuf) - 1))
+    {
+      lineBuf[lineLen++] = c;
+    }
+    else
+    {
+      lineLen = 0;
+      Serial.println("M2 ERR: Eingabe zu lang");
+    }
+  }
+}
+
+void processUsbBridgeLine(char *line)
+{
+  if (line == nullptr || line[0] == '\0')
+    return;
+
+  char *savePtr = nullptr;
+  char *token = strtok_r(line, " ,\t", &savePtr);
+  if (token == nullptr)
+    return;
+
+  if (!strcasecmp(token, "HELP") || !strcasecmp(token, "?"))
+  {
+    Serial.println("M2 USAGE: [M2] <CMD> <ADDR> [DATA...]  (Bytewerte in dec oder hex, z. B. C0 0D 14)");
+    Serial.println("M2: Modul-Antworten erscheinen nach dem Senden als 'M2 RX: ...'");
+    return;
+  }
+
+  if (!strcasecmp(token, "M2"))
+  {
+    token = strtok_r(nullptr, " ,\t", &savePtr);
+    if (token == nullptr)
+    {
+      Serial.println("M2 ERR: CMD fehlt");
+      return;
+    }
+  }
+
+  uint8_t bytes[8];
+  size_t count = 0;
+
+  while (token != nullptr && count < sizeof(bytes))
+  {
+    uint8_t value = 0;
+    if (!parseBridgeByte(token, value))
+    {
+      Serial.print("M2 ERR: ungueltiges Byte '");
+      Serial.print(token);
+      Serial.println("'");
+      return;
+    }
+
+    bytes[count++] = value;
+    token = strtok_r(nullptr, " ,\t", &savePtr);
+  }
+
+  if (token != nullptr)
+  {
+    Serial.println("M2 ERR: zu viele Bytes (max 8 insgesamt)");
+    return;
+  }
+
+  if (count < 2)
+  {
+    Serial.println("M2 ERR: mindestens CMD und ADDR benoetigt");
+    return;
+  }
+
+  const uint8_t cmd = bytes[0];
+  const uint8_t addr = bytes[1];
+  const uint8_t *payload = (count > 2) ? &bytes[2] : nullptr;
+  const size_t payloadLen = (count > 2) ? (count - 2) : 0;
+
+  module2SendCommand(cmd, addr, payload, payloadLen);
+
+  Serial.print("M2 OK: CMD=");
+  Serial.printf("%02X", cmd);
+  Serial.print(" ADDR=");
+  Serial.printf("%02X", addr);
+  Serial.print(" DATA=");
+  for (size_t i = 0; i < payloadLen; i++)
+  {
+    Serial.printf("%02X", payload[i]);
+    if (i + 1 < payloadLen)
+      Serial.print(' ');
+  }
+  if (payloadLen == 0)
+    Serial.print("<none>");
+  Serial.println();
+}
+
+bool parseBridgeByte(const char *token, uint8_t &out)
+{
+  if (token == nullptr || *token == '\0')
+    return false;
+
+  char *endPtr = nullptr;
+  unsigned long value = strtoul(token, &endPtr, 0);
+  if (*endPtr != '\0')
+  {
+    value = strtoul(token, &endPtr, 16);
+  }
+
+  if (*endPtr != '\0' || value > 0xFF)
+    return false;
+
+  out = static_cast<uint8_t>(value);
+  return true;
 }
 
 
